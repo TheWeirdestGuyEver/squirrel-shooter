@@ -52,7 +52,7 @@
     class Squirrel {
       constructor() {
         this.x = Math.random() * canvas.width;
-        this.y = Math.random() * (canvas.height - 100) + 50;
+        this.y = Math.random() * (canvas.height - 150) + 50; // Adjusted to move squirrels up
         this.size = 40;
         this.speed = Math.random() * 2 + 1;
       }
@@ -65,7 +65,7 @@
         this.x -= this.speed;
         if (this.x < -this.size) {
           this.x = canvas.width + this.size;
-          this.y = Math.random() * (canvas.height - 100) + 50;
+          this.y = Math.random() * (canvas.height - 150) + 50; // Adjusted to move squirrels up
         }
       }
     }
@@ -125,8 +125,10 @@
 
       // Draw hit text if available
       if (hitText) {
+        const textWidth = 115; // Increased size by 15%
+        const textHeight = 45;
         ctx.globalAlpha = hitText.opacity;
-        ctx.drawImage(hitTextImage, hitText.x - 50, hitText.y - 30, 100, 30);
+        ctx.drawImage(hitTextImage, hitText.x - textWidth / 2, hitText.y - textHeight / 2, textWidth, textHeight);
         ctx.globalAlpha = 1; // Reset opacity
       }
 
