@@ -47,6 +47,9 @@
     const hitTextImage = new Image();
     hitTextImage.src = "https://github.com/TheWeirdestGuyEver/squirrel-shooter/blob/main/$Fukpnut.png?raw=true";
 
+    const backgroundImage = new Image();
+    backgroundImage.src = "https://github.com/TheWeirdestGuyEver/squirrel-shooter/blob/main/background.png?raw=true";
+
     let hitText = null;
 
     class Squirrel {
@@ -109,7 +112,8 @@
     }
 
     function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Draw background
+      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
       // Draw clouds
       clouds.forEach((cloud) => {
@@ -125,8 +129,8 @@
 
       // Draw hit text if available
       if (hitText) {
-        const textWidth = 115; // Increased size by 15%
-        const textHeight = 45;
+        const textWidth = 132; // Increased size by another 15%
+        const textHeight = 52;
         ctx.globalAlpha = hitText.opacity;
         ctx.drawImage(hitTextImage, hitText.x - textWidth / 2, hitText.y - textHeight / 2, textWidth, textHeight);
         ctx.globalAlpha = 1; // Reset opacity
