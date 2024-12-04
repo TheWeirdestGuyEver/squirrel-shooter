@@ -23,120 +23,95 @@
       padding: 5px 10px;
       border-radius: 5px;
     }
-    #hit-text {
-      position: absolute;
-      font-size: 30px;
-      font-family: Arial, sans-serif;
-      color: red;
-      font-weight: bold;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
   </style>
 </head>
 <body>
   <div id="score">Score: 0</div>
-  <div id="hit-text">$FUKPNUT</div>
   <canvas id="gameCanvas"></canvas>
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    const scoreElement = document.getElementById("score");
-    const hitText = document.getElementById("hit-text");
 
     canvas.width = window.innerWidth;
     canvas.height = 400;
 
-    const cloudImage = new Image();
-    cloudImage.src = "https://i.imgur.com/QpIkANZ.png"; // Cloud background image URL
-
-    const squirrelImage = new Image();
-    squirrelImage.src = "https://github.com/TheWeirdestGuyEver/squirrel-shooter/blob/main/Squirrel.png?raw=true";
-
-    const gunImage = new Image();
-    gunImage.src = "https://i.imgur.com/6YP1Y.png"; // Example gun image URL
-
     let score = 0;
     let squirrels = [];
     let clouds = [];
-    let bullets = [];
-    const bulletSpeed = 5;
+    const squirrelImage = new Image();
+    squirrelImage.src = "https://github.com/TheWeirdestGuyEver/squirrel-shooter/blob/main/Squirrel.png?raw=true";
+
+    const cloudImage = new Image();
+    cloudImage.src = "https://github.com/TheWeirdestGuyEver/squirrel-shooter/blob/main/cloud.png?raw=true";
+
+    const hitTextImage = new Image();
+    hitTextImage.src = "https://github.com/TheWeirdestGuyEver/squirrel-shooter/blob/main/$Fukpnut.png?raw=true";
+
+    let hitText = null;
 
     class Squirrel {
-      constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.size = 50;
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * (canvas.height - 100) + 50;
+        this.size = 40;
+        this.speed = Math.random() * 2 + 1;
       }
 
       draw() {
         ctx.drawImage(squirrelImage, this.x, this.y, this.size, this.size);
       }
-    }
-
-    class Bullet {
-      constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.radius = 5;
-      }
-
-      draw() {
-        ctx.fillStyle = "red";
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.closePath();
-      }
 
       update() {
-        this.y -= bulletSpeed;
+        this.x -= this.speed;
+        if (this.x < -this.size) {
+          this.x = canvas.width + this.size;
+          this.y = Math.random() * (canvas.height - 100) + 50;
+        }
       }
     }
 
     class Cloud {
-      constructor(x, y, speed) {
-        this.x = x;
-        this.y = y;
-        this.speed = speed;
+      constructor() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * 100;
+        this.speed = 0.5 + Math.random() * 0.5;
       }
 
       draw() {
-        ctx.drawImage(cloudImage, this.x, this.y, 100, 50);
+        ctx.drawImage(cloudImage, this.x, this.y, 100, 60);
       }
 
       update() {
         this.x -= this.speed;
-        if (this.x < -100) this.x = canvas.width;
+        if (this.x < -100) {
+          this.x = canvas.width;
+        }
       }
     }
 
     function spawnSquirrels() {
       for (let i = 0; i < 5; i++) {
-        squirrels.push(new Squirrel(100 + i * 150, canvas.height - 150));
+        squirrels.push(new Squirrel());
       }
     }
 
     function spawnClouds() {
       for (let i = 0; i < 3; i++) {
-        clouds.push(new Cloud(i * 200, Math.random() * 100, 0.5 + Math.random()));
+        clouds.push(new Cloud());
       }
     }
 
     function displayHitText(x, y) {
-      hitText.style.left = x + "px";
-      hitText.style.top = y + "px";
-      hitText.style.opacity = 1;
-
+      hitText = { x, y, opacity: 1 };
       setTimeout(() => {
-        hitText.style.opacity = 0;
+        hitText = null;
       }, 500);
     }
 
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw background clouds
+      // Draw clouds
       clouds.forEach((cloud) => {
         cloud.update();
         cloud.draw();
@@ -144,43 +119,38 @@
 
       // Draw squirrels
       squirrels.forEach((squirrel) => {
+        squirrel.update();
         squirrel.draw();
       });
 
-      // Update and draw bullets
-      bullets.forEach((bullet, bulletIndex) => {
-        bullet.update();
-        bullet.draw();
-
-        // Check collision with squirrels
-        squirrels.forEach((squirrel, squirrelIndex) => {
-          const dist = Math.sqrt(
-            (bullet.x - (squirrel.x + squirrel.size / 2)) ** 2 +
-            (bullet.y - (squirrel.y + squirrel.size / 2)) ** 2
-          );
-          if (dist < squirrel.size / 2) {
-            bullets.splice(bulletIndex, 1);
-            squirrels.splice(squirrelIndex, 1);
-            score += 10;
-            scoreElement.textContent = `Score: ${score}`;
-            displayHitText(bullet.x, bullet.y);
-          }
-        });
-      });
-
-      // Draw gun at bottom
-      ctx.drawImage(gunImage, canvas.width / 2 - 50, canvas.height - 70, 100, 70);
+      // Draw hit text if available
+      if (hitText) {
+        ctx.globalAlpha = hitText.opacity;
+        ctx.drawImage(hitTextImage, hitText.x - 50, hitText.y - 30, 100, 30);
+        ctx.globalAlpha = 1; // Reset opacity
+      }
 
       requestAnimationFrame(animate);
+    }
+
+    function checkHit(x, y) {
+      squirrels.forEach((squirrel, index) => {
+        const dist = Math.sqrt((squirrel.x + squirrel.size / 2 - x) ** 2 + (squirrel.y + squirrel.size / 2 - y) ** 2);
+        if (dist < squirrel.size / 2) {
+          squirrels.splice(index, 1);
+          score += 10;
+          document.getElementById("score").textContent = `Score: ${score}`;
+          squirrels.push(new Squirrel());
+          displayHitText(x, y);
+        }
+      });
     }
 
     canvas.addEventListener("click", (e) => {
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
-
-      // Spawn bullet
-      bullets.push(new Bullet(canvas.width / 2, canvas.height - 70));
+      checkHit(mouseX, mouseY);
     });
 
     window.addEventListener("resize", () => {
