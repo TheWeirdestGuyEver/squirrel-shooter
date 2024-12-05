@@ -38,7 +38,8 @@
     let score = 0;
     let squirrels = [];
     let clouds = [];
-    let lastRandomSFX = 0;
+    let nextShowThatSquirrel = getRandomInterval(250, 500);
+    let nextHeDeservedIt = getRandomInterval(650, 1100);
 
     const squirrelImage = new Image();
     squirrelImage.src = "https://github.com/TheWeirdestGuyEver/squirrel-shooter/blob/main/Squirrel.png?raw=true";
@@ -60,7 +61,7 @@
 
     const backgroundMusic = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/background-music.mp3");
     backgroundMusic.loop = true;
-    backgroundMusic.volume = 0.425; // Reduced volume to 15% lower than the initial level
+    backgroundMusic.volume = 0.425;
 
     // Voice SFX
     const sfx500 = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/500_points.mp3");
@@ -69,13 +70,10 @@
     const sfxShowThatSquirrel = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/show_that%20_squirrel.mp3");
     const sfxHeDeservedIt = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/he_desserved_it.mp3");
 
-    // Adjust all SFX volumes
     [sfx500, sfx1000, sfx10k, sfxShowThatSquirrel, sfxHeDeservedIt].forEach(sfx => (sfx.volume = 0.5));
 
     let hitText = null;
     let explosions = [];
-    let nextShowThatSquirrel = getRandomInterval(250, 500);
-    let nextHeDeservedIt = getRandomInterval(650, 1100);
 
     function getRandomInterval(min, max) {
       return Math.floor(Math.random() * (max - min + 1) + min);
@@ -84,7 +82,7 @@
     class Squirrel {
       constructor() {
         this.x = Math.random() * canvas.width;
-        this.y = Math.random() * (canvas.height - 150) + 50; // Adjusted to move squirrels up
+        this.y = Math.random() * (canvas.height - 150) + 50;
         this.size = 40;
         this.speed = Math.random() * 2 + 1;
       }
@@ -97,7 +95,7 @@
         this.x -= this.speed;
         if (this.x < -this.size) {
           this.x = canvas.width + this.size;
-          this.y = Math.random() * (canvas.height - 150) + 50; // Adjusted to move squirrels up
+          this.y = Math.random() * (canvas.height - 150) + 50;
         }
       }
     }
@@ -144,7 +142,17 @@
       explosions.push({ x, y, timer: 500 });
     }
 
-    function playVoiceSFX() {
+    function drawExplosions() {
+      explosions.forEach((explosion, index) => {
+        ctx.drawImage(explodeGif, explosion.x - 90, explosion.y - 90, 180, 180);
+        explosion.timer -= 16;
+        if (explosion.timer <= 0) {
+          explosions.splice(index, 1);
+        }
+      });
+    }
+
+    function playRandomSFX() {
       if (score >= nextShowThatSquirrel) {
         sfxShowThatSquirrel.play();
         nextShowThatSquirrel += getRandomInterval(250, 500);
@@ -155,42 +163,27 @@
       }
     }
 
-    function drawExplosions() {
-      explosions.forEach((explosion, index) => {
-        ctx.drawImage(explodeGif, explosion.x - 90, explosion.y - 90, 180, 180); // Explosion size
-        explosion.timer -= 16;
-        if (explosion.timer <= 0) {
-          explosions.splice(index, 1);
-        }
-      });
-    }
-
     function animate() {
-      // Draw background
       ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
-      // Draw clouds
-      clouds.forEach((cloud) => {
+      clouds.forEach(cloud => {
         cloud.update();
         cloud.draw();
       });
 
-      // Draw squirrels
-      squirrels.forEach((squirrel) => {
+      squirrels.forEach(squirrel => {
         squirrel.update();
         squirrel.draw();
       });
 
-      // Draw explosions
       drawExplosions();
 
-      // Draw hit text if available
       if (hitText) {
-        const textWidth = 132; // Increased size
+        const textWidth = 132;
         const textHeight = 52;
         ctx.globalAlpha = hitText.opacity;
         ctx.drawImage(hitTextImage, hitText.x - textWidth / 2, hitText.y - textHeight / 2, textWidth, textHeight);
-        ctx.globalAlpha = 1; // Reset opacity
+        ctx.globalAlpha = 1;
       }
 
       requestAnimationFrame(animate);
@@ -206,19 +199,18 @@
           squirrels.push(new Squirrel());
           displayHitText(x, y);
           addExplosion(x, y);
-          hitSound.play(); // Play hit sound
+          hitSound.play();
 
-          // Specific SFX for points
           if (score === 500) sfx500.play();
           if (score === 1000) sfx1000.play();
           if (score === 10000) sfx10k.play();
 
-          playVoiceSFX(); // Play random voice SFX
+          playRandomSFX();
         }
       });
     }
 
-    canvas.addEventListener("click", (e) => {
+    canvas.addEventListener("click", e => {
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
@@ -230,11 +222,13 @@
       canvas.height = 400;
     });
 
-    // Start background music on first click
     canvas.addEventListener("click", () => {
-      if (backgroundMusic.paused) {
-        backgroundMusic.play();
-      }
+      if (backgroundMusic.paused) backgroundMusic.play();
     });
 
     spawnSquirrels();
+    spawnClouds();
+    animate();
+  </script>
+</body>
+</html>
