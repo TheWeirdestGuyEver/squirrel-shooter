@@ -38,6 +38,8 @@
     let score = 0;
     let squirrels = [];
     let clouds = [];
+    let lastRandomSFX = 0;
+
     const squirrelImage = new Image();
     squirrelImage.src = "https://github.com/TheWeirdestGuyEver/squirrel-shooter/blob/main/Squirrel.png?raw=true";
 
@@ -51,16 +53,33 @@
     backgroundImage.src = "https://github.com/TheWeirdestGuyEver/squirrel-shooter/blob/main/background.png?raw=true";
 
     const hitSound = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/hit-sound.wav");
+    hitSound.volume = 0.5;
 
     const explodeGif = new Image();
     explodeGif.src = "https://github.com/TheWeirdestGuyEver/squirrel-shooter/blob/main/explode.gif?raw=true";
 
     const backgroundMusic = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/background-music.mp3");
     backgroundMusic.loop = true;
-    backgroundMusic.volume = 0.5;
+    backgroundMusic.volume = 0.425; // Reduced volume to 15% lower than the initial level
+
+    // Voice SFX
+    const sfx500 = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/500_points.mp3");
+    const sfx1000 = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/1000_points.mp3");
+    const sfx10k = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/10,000_points.mp3");
+    const sfxShowThatSquirrel = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/show_that%20_squirrel.mp3");
+    const sfxHeDeservedIt = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/he_desserved_it.mp3");
+
+    // Adjust all SFX volumes
+    [sfx500, sfx1000, sfx10k, sfxShowThatSquirrel, sfxHeDeservedIt].forEach(sfx => (sfx.volume = 0.5));
 
     let hitText = null;
     let explosions = [];
+    let nextShowThatSquirrel = getRandomInterval(250, 500);
+    let nextHeDeservedIt = getRandomInterval(650, 1100);
+
+    function getRandomInterval(min, max) {
+      return Math.floor(Math.random() * (max - min + 1) + min);
+    }
 
     class Squirrel {
       constructor() {
@@ -125,9 +144,20 @@
       explosions.push({ x, y, timer: 500 });
     }
 
+    function playVoiceSFX() {
+      if (score >= nextShowThatSquirrel) {
+        sfxShowThatSquirrel.play();
+        nextShowThatSquirrel += getRandomInterval(250, 500);
+      }
+      if (score >= nextHeDeservedIt) {
+        sfxHeDeservedIt.play();
+        nextHeDeservedIt += getRandomInterval(650, 1100);
+      }
+    }
+
     function drawExplosions() {
       explosions.forEach((explosion, index) => {
-        ctx.drawImage(explodeGif, explosion.x - 90, explosion.y - 90, 180, 180); // Increased to 180px × 180px
+        ctx.drawImage(explodeGif, explosion.x - 90, explosion.y - 90, 180, 180); // Explosion size
         explosion.timer -= 16;
         if (explosion.timer <= 0) {
           explosions.splice(index, 1);
@@ -177,6 +207,13 @@
           displayHitText(x, y);
           addExplosion(x, y);
           hitSound.play(); // Play hit sound
+
+          // Specific SFX for points
+          if (score === 500) sfx500.play();
+          if (score === 1000) sfx1000.play();
+          if (score === 10000) sfx10k.play();
+
+          playVoiceSFX(); // Play random voice SFX
         }
       });
     }
@@ -201,8 +238,3 @@
     });
 
     spawnSquirrels();
-    spawnClouds();
-    animate();
-  </script>
-</body>
-</html>
