@@ -55,6 +55,10 @@
     const explodeGif = new Image();
     explodeGif.src = "https://github.com/TheWeirdestGuyEver/squirrel-shooter/blob/main/explode.gif?raw=true";
 
+    const backgroundMusic = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/background-music.mp3");
+    backgroundMusic.loop = true;
+    backgroundMusic.volume = 0.5;
+
     let hitText = null;
     let explosions = [];
 
@@ -187,6 +191,13 @@
     window.addEventListener("resize", () => {
       canvas.width = window.innerWidth;
       canvas.height = 400;
+    });
+
+    // Start background music on first click
+    canvas.addEventListener("click", () => {
+      if (backgroundMusic.paused) {
+        backgroundMusic.play();
+      }
     });
 
     spawnSquirrels();
