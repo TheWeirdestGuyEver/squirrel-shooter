@@ -50,6 +50,8 @@
     const backgroundImage = new Image();
     backgroundImage.src = "https://github.com/TheWeirdestGuyEver/squirrel-shooter/blob/main/background.png?raw=true";
 
+    const hitSound = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/hit-sound.wav");
+
     let hitText = null;
 
     class Squirrel {
@@ -129,7 +131,7 @@
 
       // Draw hit text if available
       if (hitText) {
-        const textWidth = 132; // Increased size by another 15%
+        const textWidth = 132; // Increased size
         const textHeight = 52;
         ctx.globalAlpha = hitText.opacity;
         ctx.drawImage(hitTextImage, hitText.x - textWidth / 2, hitText.y - textHeight / 2, textWidth, textHeight);
@@ -148,6 +150,7 @@
           document.getElementById("score").textContent = `Score: ${score}`;
           squirrels.push(new Squirrel());
           displayHitText(x, y);
+          hitSound.play(); // Play hit sound
         }
       });
     }
