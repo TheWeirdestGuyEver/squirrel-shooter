@@ -38,6 +38,7 @@
     let score = 0;
     let squirrels = [];
     let clouds = [];
+    let milestones = { 500: false, 1000: false, 10000: false };
     let nextShowThatSquirrel = getRandomInterval(250, 500);
     let nextHeDeservedIt = getRandomInterval(650, 1100);
 
@@ -61,7 +62,7 @@
 
     const backgroundMusic = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/background-music.mp3");
     backgroundMusic.loop = true;
-    backgroundMusic.volume = 0.425;
+    backgroundMusic.volume = 0.25; // Further reduced for a noticeable difference
 
     // Voice SFX
     const sfx500 = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/500_points.mp3");
@@ -152,6 +153,21 @@
       });
     }
 
+    function playMilestoneSFX() {
+      if (score >= 500 && !milestones[500]) {
+        sfx500.play();
+        milestones[500] = true;
+      }
+      if (score >= 1000 && !milestones[1000]) {
+        sfx1000.play();
+        milestones[1000] = true;
+      }
+      if (score >= 10000 && !milestones[10000]) {
+        sfx10k.play();
+        milestones[10000] = true;
+      }
+    }
+
     function playRandomSFX() {
       if (score >= nextShowThatSquirrel) {
         sfxShowThatSquirrel.play();
@@ -186,6 +202,7 @@
         ctx.globalAlpha = 1;
       }
 
+      playRandomSFX();
       requestAnimationFrame(animate);
     }
 
@@ -200,12 +217,7 @@
           displayHitText(x, y);
           addExplosion(x, y);
           hitSound.play();
-
-          if (score === 500) sfx500.play();
-          if (score === 1000) sfx1000.play();
-          if (score === 10000) sfx10k.play();
-
-          playRandomSFX();
+          playMilestoneSFX();
         }
       });
     }
