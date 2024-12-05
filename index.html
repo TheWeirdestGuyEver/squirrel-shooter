@@ -123,7 +123,7 @@
 
     function drawExplosions() {
       explosions.forEach((explosion, index) => {
-        ctx.drawImage(explodeGif, explosion.x - 37.5, explosion.y - 37.5, 75, 75); // Increased size by 50%
+        ctx.drawImage(explodeGif, explosion.x - 30, explosion.y - 30, 60, 60); // Adjusted to 60px × 60px
         explosion.timer -= 16;
         if (explosion.timer <= 0) {
           explosions.splice(index, 1);
