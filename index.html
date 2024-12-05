@@ -52,7 +52,11 @@
 
     const hitSound = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/hit-sound.wav");
 
+    const explodeGif = new Image();
+    explodeGif.src = "https://github.com/TheWeirdestGuyEver/squirrel-shooter/blob/main/explode.gif?raw=true";
+
     let hitText = null;
+    let explosions = [];
 
     class Squirrel {
       constructor() {
@@ -113,6 +117,20 @@
       }, 500);
     }
 
+    function addExplosion(x, y) {
+      explosions.push({ x, y, timer: 500 });
+    }
+
+    function drawExplosions() {
+      explosions.forEach((explosion, index) => {
+        ctx.drawImage(explodeGif, explosion.x - 25, explosion.y - 25, 50, 50); // Adjust size as needed
+        explosion.timer -= 16;
+        if (explosion.timer <= 0) {
+          explosions.splice(index, 1);
+        }
+      });
+    }
+
     function animate() {
       // Draw background
       ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
@@ -128,6 +146,9 @@
         squirrel.update();
         squirrel.draw();
       });
+
+      // Draw explosions
+      drawExplosions();
 
       // Draw hit text if available
       if (hitText) {
@@ -150,6 +171,7 @@
           document.getElementById("score").textContent = `Score: ${score}`;
           squirrels.push(new Squirrel());
           displayHitText(x, y);
+          addExplosion(x, y);
           hitSound.play(); // Play hit sound
         }
       });
