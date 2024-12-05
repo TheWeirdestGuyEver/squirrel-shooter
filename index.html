@@ -39,8 +39,8 @@
     let squirrels = [];
     let clouds = [];
     let milestones = { 500: false, 1000: false, 10000: false };
-    let nextShowThatSquirrel = getRandomInterval(250, 500);
-    let nextHeDeservedIt = getRandomInterval(650, 1100);
+    let nextShowThatSquirrel = getRandomInterval(500, 800);
+    let nextHeDeservedIt = getRandomInterval(1200, 1600);
 
     const squirrelImage = new Image();
     squirrelImage.src = "https://github.com/TheWeirdestGuyEver/squirrel-shooter/blob/main/Squirrel.png?raw=true";
@@ -62,7 +62,7 @@
 
     const backgroundMusic = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/background-music.mp3");
     backgroundMusic.loop = true;
-    backgroundMusic.volume = 0.25; // Further reduced for a noticeable difference
+    backgroundMusic.volume = 0.15; // Further reduced volume
 
     // Voice SFX
     const sfx500 = new Audio("https://github.com/TheWeirdestGuyEver/squirrel-shooter/raw/refs/heads/main/500_points.mp3");
@@ -171,11 +171,11 @@
     function playRandomSFX() {
       if (score >= nextShowThatSquirrel) {
         sfxShowThatSquirrel.play();
-        nextShowThatSquirrel += getRandomInterval(250, 500);
+        nextShowThatSquirrel += getRandomInterval(500, 800);
       }
       if (score >= nextHeDeservedIt) {
         sfxHeDeservedIt.play();
-        nextHeDeservedIt += getRandomInterval(650, 1100);
+        nextHeDeservedIt += getRandomInterval(1200, 1600);
       }
     }
 
@@ -222,7 +222,11 @@
       });
     }
 
+    window.addEventListener("focus", () => backgroundMusic.play());
+    window.addEventListener("blur", () => backgroundMusic.pause());
+
     canvas.addEventListener("click", e => {
+      if (backgroundMusic.paused) backgroundMusic.play();
       const rect = canvas.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
@@ -232,10 +236,6 @@
     window.addEventListener("resize", () => {
       canvas.width = window.innerWidth;
       canvas.height = 400;
-    });
-
-    canvas.addEventListener("click", () => {
-      if (backgroundMusic.paused) backgroundMusic.play();
     });
 
     spawnSquirrels();
